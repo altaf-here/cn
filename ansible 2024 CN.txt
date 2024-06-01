@@ -1,0 +1,50 @@
+sudo su - 
+yum update -y
+
+=================================Run This in Ansible Server===========================
+
+# To download the EPEL repository RPM
+# EPRL (Extra Packages for Enterprise Linux),
+# To enhance the functionality and versatility of Ansible (by providing access to a broader range of software packages and dependencies).
+# It's a Fedora Special Interest Group that creates, maintains, and manages high-quality additional packages for Enterprise Linux distributions such as Red Hat Enterprise Linux (RHEL), CentOS, and others derived from RHEL.
+
+wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+
+yum install epel-release-latest-7.noarch.rpm
+
+yum update -y
+
+# To install python as ansible is python based software & required it to run smoothly
+yum install git python python-level python-pip openssl ansible -y
+
+ansible --version 
+
+# Configure the ansible default inventory file. In this add the host details  
+vi /etc/ansible/hosts 		#(make a group and mention private ip of nodes)
+
+
+# To configure default configuration (settings) file for Ansible
+vi /etc/ansible/ansible.cfg 	#(uncomment inventory and sudo_user)
+
+
+==============================Run This on All Ansible Server==========================
+sudo su -
+sudo yum update -y 
+
+# To edit/configure the SSH server configuration file
+vi /etc/ssh/sshd_config
+
+(uncomment PermitRootLogin yes uncomment
+PasswordAuthentication yes and comment #PasswordAuthentication no)
+
+service sshd restart
+
+useradd ansible
+
+passwd ansible
+
+=================================Run This in Ansible Server===========================
+suod su - ansible
+ssh-keygen
+cd .ssh
+ssh-copy-id ansible@private_ip

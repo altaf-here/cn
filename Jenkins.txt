@@ -1,0 +1,29 @@
+# Setup the jenkins repository, to do this we downloaded the this repo configuration from jenkins-official-website and using -O flag we store it in /etc/yum.repos.d/jenkins.repo   
+
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+
+# To imports the GPG key from jenkins this required to access the jenkins-official-website repo for downloading the jenkins 
+
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+  
+# To install java as jenkins is java based application so it required
+# And also install the fontconfig, as it make available and configure the java 
+yum install fontconfig java-17-openjdk
+ 
+ 
+# To install the jenkins
+yum install jenkins
+
+
+jenkins --version
+
+systemctl enable jenkins
+
+systemctl start jenkins
+
+systemctl status jenkins
+
+systemctl restart jenkins
+
+go to googl paste the <private_ip>:8080 and initial admin password is in the file in the /var/    folder 

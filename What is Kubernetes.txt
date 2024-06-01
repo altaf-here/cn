@@ -1,0 +1,131 @@
+#Take ubuntu t3 medium instance
+
+#Switch to root user and run below command
+
+sudo su - 
+apt update && apt -y install docker.io
+
+#Switch to ubuntu user and run below commands
+
+exit
+
+#to download the kubectl and minikube
+
+wget https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+
+# copy and move minikube to /usr/local/bin/  --> to make available to other users
+
+sudo cp minikube-linux-amd64 /usr/local/bin/minikube
+
+# change permisitions to user as all and other and group as read and execute 
+
+sudo chmod 755 /usr/local/bin/minikube
+
+#download kubectl 
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+
+#To installs the kubectl binary to /usr/local/bin directory with root user ownership #and permissions set to 0755
+#as the root user ensures that it is available system-wide and can be executed by any #user on the system without permission issues. Since kubectl often needs to interact #with various system resources and manage Kubernetes clusters
+
+sudo install -o root -m 0755 kubectl /usr/local/bin/kubectl
+
+# To check the version
+
+kubectl version
+
+#add the current user to the docker group using usermod, which grants the user #permissions to execute Docker commands without needing to use sudo each time. Then, #newgrp docker is used to activate these group membership changes without needing to #log out and log in.
+
+sudo usermod -aG docker $USER && newgrp docker
+
+# initializes a local Kubernetes cluster using Minikube with Docker as the driver. #Minikube is a tool that allows you to run Kubernetes clusters locally for #development and testing purposes.
+
+minikube start --driver=docker
+
+minikube status
+
+#See a list of your Kubernetes environments
+
+#To list Kubernetes environments, including Minikube
+kubectl config get-contexts
+
+#To use the Minikube cluster as the active Kubernetes environment.
+kubectl config use-context minikube
+
+#Run a Sample Application
+kubectl create deployment nginx --image=nginx
+
+#Expose the Application
+kubectl expose deployment nginx --port=80 --type=NodePort
+
+# Access the Application
+minikube service nginx
+
+
+======================================================================================
+#
+repolist = to display a list of enabled yum repositories and the number of packages available in each repository
+
+# tee = reads from terminal (standard input) and writes to standard output and files simultaneously
+
+echo "Hello, world!" | tee output.txt
+
+
+cat <<EOF is a syntax used in shell scripting to create a document, which allows you to input multiple lines of text to be passed as standard input to a command or written to a file.
+
+cat <<EOF > file.txt
+This is the first line of the file.
+This is the second line of the file.
+EOF
+
+
+# installing using the rpm repository, to do this setup/configure the yum repo 
+# This overwrites any existing configuration in /etc/yum.repos.d/kubernetes.repo
+
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.28/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+EOF
+
+
+
+# Set SELinux in permissive mode (effectively disabling it)
+# This is required to allow containers to access the host filesystem
+sudo setenforce 0
+sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+sudo yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+sudo systemctl enable --now kubelet
+
+#Run the below command on only master
+kubeadm init
+kubeadm init --apiserver-advertise-address=172.31.81.20  --pod-network-cidr=10.244.0.0/16
+
+# CIDR, which stands for Classless Inter-Domain Routing, is a method used in networking to allocate IP addresses and create address ranges
+
+
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+#-i = interactive.
+
+
+$(id -u): Command substitution to get the current user's user ID.
+$(id -g): Command substitution to get the current user's group ID
+-i  This flag ensures that the command doesn't overwrite an existing file without confirmation
+
+
+kubectl get nodes
+
+# install the CNI, that is defination that defines how container runtimes should set up networking for containers.
+where as 
+kube-proxy is a Kubernetes component responsible for managing network connectivity to Kubernetes services.
+
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+kubectl get nodes
